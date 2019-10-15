@@ -12,7 +12,7 @@ Below are working API Paths:
 - Pages
 
 ## Overview
-Restlr is experimental Golang based API based CMS that is fully compatible with WP Rest API and can connect directly to existing Wordpress database.
+Restlr is experimental Golang based CMS API that is fully compatible with Wordpress Rest API and can connect directly to existing Wordpress database.
 
 ## Why does this project exist?
 The purpose of this project is to provide faster, more secure and memory efficient alternative of official Wordpress Rest API and 
