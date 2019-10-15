@@ -1,10 +1,13 @@
 # Restlr 
 Open Source WP Rest API Compatible Golang CMS API.
 
-##Status
-Alpha (WIP)
+### Author
+Isak Rickyanto
 
-Below are working API Path:
+## Status
+Alpha (WIP) - Still in early development
+
+Below are working API Paths:
 - Posts
 - Pages
 
