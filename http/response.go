@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	httpkit "github.com/go-kit/kit/transport/http"
-	"net/http"
 	"github.com/qreasio/restlr/model"
+	"net/http"
 )
 
 const (
@@ -16,19 +16,22 @@ const (
 	RestInvalidPostIDMessage = "Invalid post ID"
 )
 
-type HttpAPIResponse struct {
+// APIResponse is struct to represent api response mainly on non 200 http status response
+type APIResponse struct {
 	Code    string       `json:"code"`
 	Message string       `json:"message"`
 	Data    ResponseData `json:"data"`
 }
 
+// ResponseData is child struct of APIResponse for Data field
 type ResponseData struct {
 	Status int               `json:"status"`
 	Params map[string]string `json:"replies,omitempty"`
 }
 
-func NewRouteNotFoundResponse() HttpAPIResponse {
-	return HttpAPIResponse{
+// NewRouteNotFoundResponse is used to generate custom route not found api response
+func NewRouteNotFoundResponse() APIResponse {
+	return APIResponse{
 		Code:    RestNoRouteCode,
 		Message: NoRouteMessage,
 		Data: ResponseData{
@@ -37,8 +40,9 @@ func NewRouteNotFoundResponse() HttpAPIResponse {
 	}
 }
 
-func NewInvalidPostResponse() HttpAPIResponse {
-	return HttpAPIResponse{
+// NewInvalidPostResponse is used to generate invalid post api response
+func NewInvalidPostResponse() APIResponse {
+	return APIResponse{
 		Code:    RestInvalidIDCode,
 		Message: RestInvalidPostIDMessage,
 		Data: ResponseData{
@@ -47,8 +51,9 @@ func NewInvalidPostResponse() HttpAPIResponse {
 	}
 }
 
-func NewInvalidParam(invalidParameter string, invalidMessage string) HttpAPIResponse {
-	response := HttpAPIResponse{
+// NewInvalidParam is used to generate custom invalid parameter api response
+func NewInvalidParam(invalidParameter string, invalidMessage string) APIResponse {
+	response := APIResponse{
 		Code:    RestInvalidParamCode,
 		Message: "Invalid parameter(s): " + invalidParameter,
 		Data: ResponseData{
@@ -57,12 +62,13 @@ func NewInvalidParam(invalidParameter string, invalidMessage string) HttpAPIResp
 	}
 
 	if invalidParameter != "" {
-		response.Data.Params = map[string]string{ invalidParameter: invalidMessage }
+		response.Data.Params = map[string]string{invalidParameter: invalidMessage}
 	}
 	return response
 }
 
 /**
+Example HTTP Error Response
 404
 {
   "code": "rest_post_invalid_id",
@@ -93,6 +99,7 @@ func NewInvalidParam(invalidParameter string, invalidMessage string) HttpAPIResp
   }
 }
 */
+
 // EncodeJSONResponse is a Custom EncodeResponseFunc that serializes the response as a
 // JSON object to the ResponseWriter using json library package to serialize json.
 // Many JSON-over-HTTP services can use it as
@@ -112,7 +119,7 @@ func EncodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 	if sc, ok := response.(httpkit.StatusCoder); ok {
 		code = sc.StatusCode()
 	}
-	if resp, ok := response.(HttpAPIResponse); ok {
+	if resp, ok := response.(APIResponse); ok {
 		code = resp.Data.Status
 	}
 	w.WriteHeader(code)
@@ -123,18 +130,16 @@ func EncodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 	return json.NewEncoder(w).Encode(response)
 }
 
-// encode errors from business-logic
+// EncodeError to generate custom api response on decode error in transport layer
 func EncodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	if err == model.ErrInvalidRoute {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(NewRouteNotFoundResponse())
-	}else{
+	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(NewInvalidParam("",""))
+		json.NewEncoder(w).Encode(NewInvalidParam("", ""))
 	}
-
-
 
 }
