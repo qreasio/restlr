@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/post"
 	"github.com/qreasio/restlr/shared"
 	"github.com/qreasio/restlr/term"
 	"github.com/qreasio/restlr/user"
+	log "github.com/sirupsen/logrus"
 )
 
 // Service handles async log of audit event

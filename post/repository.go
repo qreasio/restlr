@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	log "github.com/sirupsen/logrus"
-	"github.com/yvasiyarov/php_session_decoder/php_serialize"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
+	log "github.com/sirupsen/logrus"
+	"github.com/yvasiyarov/php_session_decoder/php_serialize"
 	"strconv"
 	"strings"
 )

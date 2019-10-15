@@ -5,11 +5,11 @@ import (
 	"github.com/go-chi/chi"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-playground/form"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 	resthttp "github.com/qreasio/restlr/http"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
+	log "github.com/sirupsen/logrus"
+	"net/http"
 	"strconv"
 )
 

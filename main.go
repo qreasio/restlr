@@ -4,10 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-chi/chi"
-	log "github.com/sirupsen/logrus"
-	"github.com/xo/dburl"
-	"net/http"
-	"os"
+	"github.com/joho/godotenv"
 	resthttp "github.com/qreasio/restlr/http"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/page"
@@ -15,28 +12,31 @@ import (
 	"github.com/qreasio/restlr/shared"
 	"github.com/qreasio/restlr/term"
 	"github.com/qreasio/restlr/user"
-	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
+	"github.com/xo/dburl"
+	"net/http"
+	"os"
 )
 
 var (
-	APIHost = "http://localhost:8080"
-	SiteURL = "http://localhost:8080"
-	UploadPath = "uploads"
+	APIHost     = "http://localhost:8080"
+	SiteURL     = "http://localhost:8080"
+	UploadPath  = "uploads"
 	TablePrefix = "wp_"
-	APIPath = "wp-json/wp"
-	Version = "v2"
+	APIPath     = "wp-json/wp"
+	Version     = "v2"
 )
 
 func SetAPIContext() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			apiModel := model.APIModel{
-				APIHost: APIHost,
+				APIHost:     APIHost,
 				SiteURL:     SiteURL,
 				UploadPath:  UploadPath,
 				TablePrefix: TablePrefix,
-				APIPath:    APIPath,
-				Version:    Version,
+				APIPath:     APIPath,
+				Version:     Version,
 			}
 			apiModel.APIBaseURL = fmt.Sprintf("%s/%s/%s", apiModel.APIHost, apiModel.APIPath, apiModel.Version)
 			ctx := context.WithValue(r.Context(), model.APICONFIGKEY, apiModel)
@@ -44,7 +44,6 @@ func SetAPIContext() func(next http.Handler) http.Handler {
 		})
 	}
 }
-
 
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
@@ -62,12 +61,12 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
-	APIHost = os.Getenv("API_HOST") // The rest api host
-	SiteURL = os.Getenv("SITE_URL") // The site host
-	UploadPath = os.Getenv("UPLOAD_PATH") // File upload path relative from site host
+	APIHost = os.Getenv("API_HOST")         // The rest api host
+	SiteURL = os.Getenv("SITE_URL")         // The site host
+	UploadPath = os.Getenv("UPLOAD_PATH")   // File upload path relative from site host
 	TablePrefix = os.Getenv("TABLE_PREFIX") // Database table prefix
-	APIPath = os.Getenv("API_PATH") // Relative API Path to api host
-	Version = os.Getenv("VERSION") // API Version path
+	APIPath = os.Getenv("API_PATH")         // Relative API Path to api host
+	Version = os.Getenv("VERSION")          // API Version path
 }
 
 func main() {

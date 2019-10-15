@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	log "github.com/sirupsen/logrus"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
