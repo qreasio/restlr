@@ -1,12 +1,20 @@
 # Restlr 
-Open Source WP Rest API Compatible Golang CMS API 
+Open Source WP Rest API Compatible Golang CMS API.
+
+##Status
+Alpha (WIP)
+
+Below are working API Path:
+- Posts
+- Pages
 
 ## Overview
 Restlr is experimental Golang based API based CMS that is fully compatible with WP Rest API and can connect directly to existing Wordpress database.
 
 ## Why does this project exist?
 The purpose of this project is to provide faster, more secure and memory efficient alternative of official Wordpress Rest API and 
-will provide CLI that query wordpress posts and pages to generate json file that is suitable for Jamstack that pull content from Wordpress database,
+will provide CLI that query wordpress posts and pages to generate json file that is suitable for Jamstack that pull content from Wordpress database, 
+then generate static site with SSG like Hugo.
 
 ## Restlr vs Wordpress Rest API Performance Comparison
 Restlr has much better performance difference (8X-9X faster) compare to WP Rest API especially if query posts with parameter _embed like: http://host/wp-json/wp/v2/posts?_embed
