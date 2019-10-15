@@ -33,6 +33,7 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
+// getQueryColumns returns slice of table columns
 func getQueryColumns(postType string, siteURL string, permalinkStructure string, alias string) []string {
 	dottedAlias := alias + "."
 	permalink := `CONCAT('` +
@@ -76,6 +77,7 @@ func getQueryColumns(postType string, siteURL string, permalinkStructure string,
 	return fields
 }
 
+// getQueryProperties return slice of struct fields/properties that will be scanned
 func getQueryProperties(post *model.Post, postType string) []interface{} {
 	fields := []interface{}{&post.ID, &post.Author, &post.Date, &post.DateGmt, &post.Content.Rendered, &post.Title.Rendered, &post.Excerpt.Rendered, &post.Status,
 		&post.CommentStatus, &post.PingStatus, &post.Password, &post.Slug, &post.Modified, &post.ModifiedGmt, &post.GUID.Rendered, &post.Type, &post.Link}
@@ -92,6 +94,7 @@ func getQueryProperties(post *model.Post, postType string) []interface{} {
 	return fields
 }
 
+// NewPost return new initialized post
 func NewPost() model.Post {
 	post := model.Post{}
 	post.Content = &model.ContentRendered{}
@@ -102,6 +105,7 @@ func NewPost() model.Post {
 	return post
 }
 
+// getPostByIDSQL return string sql to get post by id
 func getPostByIDSQL(ctx context.Context, postType string) string {
 	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
 	tableName := config.TablePrefix + "posts"
@@ -122,6 +126,7 @@ func getPostByIDSQL(ctx context.Context, postType string) string {
 	return sqlQuery
 }
 
+// getSQLFilterAndArgs return sql query and arguments from filter
 func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, []interface{}, string, string, error) {
 	var args []interface{}
 	sqlFilter := ""
@@ -332,6 +337,7 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 	return sqlFilter, args, orderBy, sortOrder, nil
 }
 
+// getSQLFilterAndArgs return sql query string and argument slice to filter posts
 func getSQLQuery(ctx context.Context, params model.ListFilter) (string, []interface{}, error) {
 	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
 	tableName := config.TablePrefix + "posts"
@@ -402,6 +408,7 @@ func (repo *repository) QueryPosts(ctx context.Context, params model.ListFilter)
 	return postIDs, err
 }
 
+// getPostsByIDsSQL return sql query string to get post from some post IDs in csv format (comma separated string)
 func (repo *repository) getPostsByIDsSQL(ctx context.Context, postType string, postIDList string) string {
 	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
 	tableName := config.TablePrefix + "posts"
@@ -468,7 +475,7 @@ func (repo *repository) PostsByIDs(ctx context.Context, postType string, idList 
 	return posts, userIDArr, nil
 }
 
-// PostByID retrieves a row from 'post_posts' as a Post.
+// PostByID retrieves a row from prefix+'_posts' as a Post.
 func (repo *repository) PostByID(ctx context.Context, id uint64, postType string) (*model.Post, error) {
 	var err error
 
