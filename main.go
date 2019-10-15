@@ -25,6 +25,7 @@ var (
 	TablePrefix = "wp_"
 	APIPath     = "wp-json/wp"
 	Version     = "v2"
+	ServerPort  = "8080"
 )
 
 func SetAPIContext() func(next http.Handler) http.Handler {
@@ -61,6 +62,7 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
+	ServerPort = os.Getenv("SERVER_PORT")   // Port of API Server
 	APIHost = os.Getenv("API_HOST")         // The rest api host
 	SiteURL = os.Getenv("SITE_URL")         // The site host
 	UploadPath = os.Getenv("UPLOAD_PATH")   // File upload path relative from site host
@@ -91,20 +93,23 @@ func main() {
 	//middleware
 	r.Use(SetAPIContext())
 
+	//set base api path base on env var
+	baseAPIPath := fmt.Sprintf("%s/%s", APIPath, Version)
+
 	//routing
-	r.Mount("/wp-json/wp/v2/posts", post.MakeHTTPHandler(postService))
-	r.Mount("/wp-json/wp/v2/pages", page.MakeHTTPHandler(pageService))
+	r.Mount(baseAPIPath + "/posts", post.MakeHTTPHandler(postService))
+	r.Mount(baseAPIPath + "/pages", page.MakeHTTPHandler(pageService))
 
 	//handle 404 notfound/invalid route with custom response
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		resthttp.EncodeJSONResponse(context.Background(), w, resthttp.NewRouteNotFoundResponse())
 	})
 
-	log.Info("SERVER is running")
-	err = http.ListenAndServe(":8080", r)
+
+	log.Printf("Restlr API starts to run at port : %s", ServerPort)
+	err = http.ListenAndServe(":"+ServerPort, r)
 
 	if err != nil {
 		log.Fatal("Error on ListenAndServe:", err)
 	}
-
 }
