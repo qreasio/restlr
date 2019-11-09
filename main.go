@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 	resthttp "github.com/qreasio/restlr/http"
@@ -14,8 +17,6 @@ import (
 	"github.com/qreasio/restlr/user"
 	log "github.com/sirupsen/logrus"
 	"github.com/xo/dburl"
-	"net/http"
-	"os"
 )
 
 var (
@@ -28,10 +29,12 @@ var (
 	ServerPort  = "8080"
 )
 
+// SetAPIContext will set the APIConfig struct instance in context to store the important data that will be used in most all endpoints
+// so it is easily accessible from endpoint by getting it from context
 func SetAPIContext() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			apiModel := model.APIModel{
+			apiModel := model.APIConfig{
 				APIHost:     APIHost,
 				SiteURL:     SiteURL,
 				UploadPath:  UploadPath,
@@ -97,14 +100,13 @@ func main() {
 	baseAPIPath := fmt.Sprintf("%s/%s", APIPath, Version)
 
 	//routing
-	r.Mount(baseAPIPath + "/posts", post.MakeHTTPHandler(postService))
-	r.Mount(baseAPIPath + "/pages", page.MakeHTTPHandler(pageService))
+	r.Mount(baseAPIPath+"/posts", post.MakeHTTPHandler(postService))
+	r.Mount(baseAPIPath+"/pages", page.MakeHTTPHandler(pageService))
 
 	//handle 404 notfound/invalid route with custom response
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		resthttp.EncodeJSONResponse(context.Background(), w, resthttp.NewRouteNotFoundResponse())
 	})
-
 
 	log.Printf("Restlr API starts to run at port : %s", ServerPort)
 	err = http.ListenAndServe(":"+ServerPort, r)

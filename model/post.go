@@ -3,10 +3,11 @@ package model
 import (
 	"context"
 	"database/sql"
-	"github.com/go-openapi/strfmt"
-	"github.com/qreasio/restlr/toolbox"
 	"strconv"
 	"strings"
+
+	"github.com/go-openapi/strfmt"
+	"github.com/qreasio/restlr/toolbox"
 )
 
 type Embedded struct {
@@ -171,7 +172,7 @@ func (p *Post) SetFeaturedMediaID(metas map[uint64]map[string]string) {
 
 // SetLinks will construct link metadata base on type
 func (p *Post) SetLinks(ctx context.Context) {
-	baseURL := ctx.Value(APICONFIGKEY).(APIModel).APIBaseURL
+	baseURL := ctx.Value(APICONFIGKEY).(APIConfig).APIBaseURL
 	links := RestLink{}
 
 	idStr := strconv.FormatUint(p.ID, 10)

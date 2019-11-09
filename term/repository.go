@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type Repository interface {
@@ -28,7 +29,7 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (repo *repository) PostTermTaxonomyByIDs(ctx context.Context, idStringArray []string) (map[uint64][]*model.TermWithPostTaxonomy, error) {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	termsTableName := config.TablePrefix + "terms"
 	termTaxonomyTableName := config.TablePrefix + "term_taxonomy"
 	termRelationsTableName := config.TablePrefix + "term_relationships"

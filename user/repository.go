@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
@@ -26,7 +27,7 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (repo *repository) GetUserByID(ctx context.Context, id uint64) (*model.UserDetail, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "users"
 	metaTableName := apiConfig.TablePrefix + "usermeta"
 
@@ -43,7 +44,7 @@ func (repo *repository) GetUserByID(ctx context.Context, id uint64) (*model.User
 }
 
 func (repo *repository) GetUserByIDList(ctx context.Context, idList []uint64) (map[uint64]*model.UserDetail, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "users"
 	metaTableName := apiConfig.TablePrefix + "usermeta"
 

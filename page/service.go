@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/post"
 	"github.com/qreasio/restlr/shared"
@@ -192,7 +193,7 @@ func (s *service) PullRawPostData(ctx context.Context, idList []uint64, authors 
 }
 
 func (s *service) SetEmbedded(ctx context.Context, p *model.Post, user *model.UserDetail) error {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	p.Embedded = &model.Embedded{}
 
 	p.Embedded.Author = s.user.UserDetailAsUserSlice(config.APIBaseURL, config.APIHost, user)

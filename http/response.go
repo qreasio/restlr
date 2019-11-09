@@ -3,9 +3,10 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	httpkit "github.com/go-kit/kit/transport/http"
 	"github.com/qreasio/restlr/model"
-	"net/http"
 )
 
 const (

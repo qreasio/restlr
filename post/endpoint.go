@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+
 	"github.com/go-kit/kit/endpoint"
 	"github.com/qreasio/restlr/http"
 	"github.com/qreasio/restlr/model"

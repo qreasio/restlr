@@ -2,6 +2,9 @@ package page
 
 import (
 	"context"
+	"net/http"
+	"strconv"
+
 	"github.com/go-chi/chi"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-playground/form"
@@ -9,8 +12,6 @@ import (
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
 )
 
 var decoder *form.Decoder

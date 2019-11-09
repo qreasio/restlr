@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type Repository interface {
@@ -27,7 +28,7 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (repo *repository) LoadOptions(ctx context.Context, autoload string, optionName []string) ([]*model.Option, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "options"
 	var err error
 
@@ -77,7 +78,7 @@ func (repo *repository) LoadOptions(ctx context.Context, autoload string, option
 }
 
 func (repo *repository) LoadOption(ctx context.Context, optionName string) (*model.Option, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "options"
 
 	var sqlQuery = `SELECT ` +
@@ -103,7 +104,7 @@ func (repo *repository) LoadOption(ctx context.Context, optionName string) (*mod
 
 func (repo *repository) PostMetasByPostIDs(ctx context.Context, idList []uint64) (map[uint64]map[string]string, error) {
 	var err error
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "postmeta"
 	idParameters := toolbox.UInt64SliceToCSV(idList)
 

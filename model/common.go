@@ -45,8 +45,8 @@ type BaseLink struct {
 	Replies []EmbeddableLink `json:"replies"`
 }
 
-// APIModel to store shared config
-type APIModel struct {
+// APIConfig to store shared config
+type APIConfig struct {
 	APIHost            string
 	TablePrefix        string
 	SiteURL            string

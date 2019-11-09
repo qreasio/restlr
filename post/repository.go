@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
 	"github.com/yvasiyarov/php_session_decoder/php_serialize"
-	"strconv"
-	"strings"
 )
 
 type Repository interface {
@@ -107,7 +108,7 @@ func NewPost() model.Post {
 
 // getPostByIDSQL return string sql to get post by id
 func getPostByIDSQL(ctx context.Context, postType string) string {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
 	permalinkStructure := "/%postname%/"
 	alias := "postp"
@@ -339,7 +340,7 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 
 // getSQLFilterAndArgs return sql query string and argument slice to filter posts
 func getSQLQuery(ctx context.Context, params model.ListFilter) (string, []interface{}, error) {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
 	var args []interface{}
 	sqlFilter, args, orderBy, sortDirection, err := getSQLFilterAndArgs(config.TablePrefix, params)
@@ -410,7 +411,7 @@ func (repo *repository) QueryPosts(ctx context.Context, params model.ListFilter)
 
 // getPostsByIDsSQL return sql query string to get post from some post IDs in csv format (comma separated string)
 func (repo *repository) getPostsByIDsSQL(ctx context.Context, postType string, postIDList string) string {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
 	permalinkStructure := "/%postname%/"
 	alias := "postp"
@@ -581,7 +582,7 @@ func (repo *repository) CommentsByPostIDs(commentPostIDStr []string) ([]*model.C
 // GetPredecessorVersion is function to get post ID of previous version from [prefix]posts table
 func (repo *repository) GetPredecessorVersion(ctx context.Context, idList []uint64) (map[uint64]map[int]uint64, error) {
 	var err error
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "posts"
 	idParameters := toolbox.UInt64SliceToCSV(idList)
 

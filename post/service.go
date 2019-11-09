@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/shared"
 	"github.com/qreasio/restlr/term"
@@ -11,8 +14,6 @@ import (
 	"github.com/qreasio/restlr/user"
 	log "github.com/sirupsen/logrus"
 	"github.com/yvasiyarov/php_session_decoder/php_serialize"
-	"strconv"
-	"strings"
 )
 
 // Service handles async log of audit event
@@ -297,7 +298,7 @@ func (s *service) GetPost(ctx context.Context, params model.GetItemRequest) (int
 
 // SetPostEmbedded set required attributes of post for _embed
 func (s *service) SetPostEmbedded(ctx context.Context, p *model.Post, taxonomies []*model.TermWithPostTaxonomy, formatMap map[uint64]string, user *model.UserDetail) error {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 
 	p.Embedded = &model.Embedded{}
 	// set author
@@ -379,7 +380,7 @@ func (s *service) GetEmbeddedFeaturedMedia(ctx context.Context, p *model.Post) (
 		}
 	}
 
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIModel)
+	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
 	mediaDetail := &model.MediaDetails{}
 
 	if metadataOk {

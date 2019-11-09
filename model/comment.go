@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"github.com/qreasio/restlr/toolbox"
 	"time"
+
+	"github.com/qreasio/restlr/toolbox"
 )
 
 type Comment struct {

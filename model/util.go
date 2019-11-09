@@ -26,7 +26,7 @@ func GenerateExcerpt(content string) string {
 
 // GetBaseURL is function to get full base API path include version
 func GetBaseURL(ctx context.Context) string {
-	apiConfig := ctx.Value(APICONFIGKEY).(APIModel)
+	apiConfig := ctx.Value(APICONFIGKEY).(APIConfig)
 	return apiConfig.APIHost + apiConfig.APIPath + apiConfig.Version
 }
 
