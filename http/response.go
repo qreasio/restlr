@@ -10,14 +10,19 @@ import (
 )
 
 const (
-	RestInvalidParamCode     = "rest_invalid_param"
-	RestNoRouteCode          = "rest_no_route"
-	RestInvalidIDCode        = "rest_post_invalid_id"
-	NoRouteMessage           = "No route was found matching the URL and request method"
+	// RestInvalidParamCode is string response code for invalid parameter error
+	RestInvalidParamCode = "rest_invalid_param"
+	// RestNoRouteCode is string response code for invalid route (404) error
+	RestNoRouteCode = "rest_no_route"
+	// RestInvalidIDCode is string response code for invalid id (404) if post/item not found
+	RestInvalidIDCode = "rest_post_invalid_id"
+	// NoRouteMessage is json response message for no route error
+	NoRouteMessage = "No route was found matching the URL and request method"
+	// RestInvalidPostIDMessage is json response message for invalid post id
 	RestInvalidPostIDMessage = "Invalid post ID"
 )
 
-// APIResponse is struct to represent api response mainly on non 200 http status response
+// APIResponse represent api response mainly on non 200 http status response
 type APIResponse struct {
 	Code    string       `json:"code"`
 	Message string       `json:"message"`

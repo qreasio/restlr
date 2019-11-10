@@ -1,11 +1,12 @@
 package model
 
-//BaseMedia represents "media" element as parf of "embedded" json response of post
+// BaseMedia represents "media" element as parf of "embedded" json response of post
 type BaseMedia struct {
 	Base
 	MediaData
 }
 
+// MediaData stores attributes for media
 type MediaData struct {
 	Caption      *Rendered     `json:"caption"`
 	AltText      string        `json:"alt_text"`
@@ -16,6 +17,7 @@ type MediaData struct {
 	Links        BaseLink      `json:"_links"`
 }
 
+// Media stores attributes for media for context view
 type Media struct {
 	ContentView
 	MediaData

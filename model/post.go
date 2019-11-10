@@ -10,6 +10,7 @@ import (
 	"github.com/qreasio/restlr/toolbox"
 )
 
+// Embedded represents _embedded json response of post
 type Embedded struct {
 	Author        []*User      `json:"author,omitempty"`
 	FeaturedMedia []*BaseMedia `json:"wp:featuredmedia,omitempty"`
@@ -142,14 +143,14 @@ func (p *Post) SetViewAttributes(
 		p.Template = template
 	}
 
-	if p.Type == "post" {
+	if p.Type == PostType {
 		// set Tags
-		tags, ok := taxonomies[p.ID]["post_tag"]
+		tags, ok := taxonomies[p.ID][TagType]
 		if ok {
 			p.Tags = tags
 		}
 		// set Categories
-		categories, ok := taxonomies[p.ID]["category"]
+		categories, ok := taxonomies[p.ID][CategoryType]
 		if ok {
 			p.Categories = categories
 		}
@@ -162,6 +163,7 @@ func (p *Post) SetViewAttributes(
 
 }
 
+// SetFeaturedMediaID set featured media of post from map
 func (p *Post) SetFeaturedMediaID(metas map[uint64]map[string]string) {
 	if featuredMedia, ok := metas[p.ID]["_thumbnail_id"]; ok {
 		if mediaID, err := strconv.ParseUint(featuredMedia, 10, 64); err == nil {
@@ -172,7 +174,7 @@ func (p *Post) SetFeaturedMediaID(metas map[uint64]map[string]string) {
 
 // SetLinks will construct link metadata base on type
 func (p *Post) SetLinks(ctx context.Context) {
-	baseURL := ctx.Value(APICONFIGKEY).(APIConfig).APIBaseURL
+	baseURL := ctx.Value(APIConfigKey).(APIConfig).APIBaseURL
 	links := RestLink{}
 
 	idStr := strconv.FormatUint(p.ID, 10)
@@ -199,20 +201,22 @@ func (p *Post) SetLinks(ctx context.Context) {
 
 	links.Curies = append(links.Curies, &Curie{Name: "wp", Href: url.Curies(), Templated: true})
 
-	if p.Type == "post" {
-		links.Term = append(links.Term, TermPost{Href: url.Categories(idStr), Embeddable: true, Taxonomy: "post_tag"})
-		links.Term = append(links.Term, TermPost{Href: url.Tags(idStr), Embeddable: true, Taxonomy: "category"})
+	if p.Type == PostType {
+		links.Term = append(links.Term, TermPost{Href: url.Categories(idStr), Embeddable: true, Taxonomy: TagType})
+		links.Term = append(links.Term, TermPost{Href: url.Tags(idStr), Embeddable: true, Taxonomy: CategoryType})
 	}
 
 	p.Links = links
 }
 
+// SetSticky set sticky value of post
 func (p *Post) SetSticky(stickyPostIDs map[int]bool) {
 	if stickyPostIDs[int(p.ID)] {
 		p.Sticky = toolbox.BoolPointer(true)
 	}
 }
 
+// SetPredecessorVersion set predecessor version of post
 func (p *Post) SetPredecessorVersion(baseURL string, predecessor uint64) {
 	url := PredecessorVersion(baseURL, p.ID, predecessor)
 	versionLink := VersionLink{ID: predecessor, Href: url}

@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
 )
 
+// Repository is interface for functions that interact with database
 type Repository interface {
 	LoadOption(ctx context.Context, optionName string) (*model.Option, error)
 	PostMetasByPostIDs(ctx context.Context, idList []uint64) (map[uint64]map[string]string, error)
@@ -21,14 +21,16 @@ type repository struct {
 	db *sql.DB
 }
 
+// NewRepository is function to create new repository struct instance that implements Repository interface
 func NewRepository(db *sql.DB) Repository {
 	return &repository{
 		db: db,
 	}
 }
 
+// LoadOptions is function get Option list from list of option name
 func (repo *repository) LoadOptions(ctx context.Context, autoload string, optionName []string) ([]*model.Option, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "options"
 	var err error
 
@@ -77,8 +79,9 @@ func (repo *repository) LoadOptions(ctx context.Context, autoload string, option
 	return res, nil
 }
 
+// LoadOptions is function get an Option from specific option name
 func (repo *repository) LoadOption(ctx context.Context, optionName string) (*model.Option, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "options"
 
 	var sqlQuery = `SELECT ` +
@@ -102,9 +105,10 @@ func (repo *repository) LoadOption(ctx context.Context, optionName string) (*mod
 	return wo, nil
 }
 
+// PostMetasByPostIDs is function get Post Meta from list of integer post id
 func (repo *repository) PostMetasByPostIDs(ctx context.Context, idList []uint64) (map[uint64]map[string]string, error) {
 	var err error
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "postmeta"
 	idParameters := toolbox.UInt64SliceToCSV(idList)
 

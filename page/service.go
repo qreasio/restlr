@@ -63,6 +63,13 @@ func (s *service) GetPage(ctx context.Context, params model.GetItemRequest) (int
 	p.SetLinks(ctx)
 	// pull required related data to construct complete post response
 	postData, err := s.PullRawPostData(ctx, []uint64{p.ID}, []uint64{p.Author}, params.IsEmbed)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"params": params.ID,
+			"func":   "s.PullRawPostData",
+		}).Errorf("Failed to pull raw post data: %s", err)
+		return nil, err
+	}
 
 	if err = s.SetPredecessorVersion(ctx, p); err != nil {
 		log.WithFields(log.Fields{
@@ -83,7 +90,7 @@ func (s *service) GetPage(ctx context.Context, params model.GetItemRequest) (int
 		}
 	}
 
-	if params.Context == "embed" {
+	if params.Context == model.EmbedContext {
 		return &model.ContentBase{Base: p.Base, SharedContent: p.SharedContent, Embedded: p.Embedded}, err
 	}
 
@@ -157,7 +164,7 @@ func (s *service) ListPages(ctx context.Context, params model.ListRequest) (inte
 			}
 		}
 
-		if params.Context != nil && *params.Context == "embed" {
+		if params.Context != nil && *params.Context == model.EmbedContext {
 			basePosts = append(basePosts, &model.ContentBase{Base: p.Base, SharedContent: p.SharedContent, Embedded: p.Embedded})
 			continue
 		}
@@ -185,7 +192,7 @@ func (s *service) PullRawPostData(ctx context.Context, idList []uint64, authors 
 		return nil, err
 	}
 
-	for idx, _ := range idList {
+	for idx := range idList {
 		rawPost.User[authors[idx]] = usersDict[authors[idx]]
 	}
 
@@ -193,7 +200,7 @@ func (s *service) PullRawPostData(ctx context.Context, idList []uint64, authors 
 }
 
 func (s *service) SetEmbedded(ctx context.Context, p *model.Post, user *model.UserDetail) error {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	p.Embedded = &model.Embedded{}
 
 	p.Embedded.Author = s.user.UserDetailAsUserSlice(config.APIBaseURL, config.APIHost, user)

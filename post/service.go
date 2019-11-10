@@ -39,7 +39,7 @@ func NewService(postRepo Repository, termRepo term.Repository, sharedRepo shared
 	}
 }
 
-// Get featured media id from the post meta map
+// GetFeaturedMedia is function to get featured media id from the post meta map
 func GetFeaturedMedia(postID uint64, metas map[uint64]map[string]string) uint64 {
 	if featuredMedia, ok := metas[postID]["_thumbnail_id"]; ok {
 		if mediaID, err := strconv.ParseUint(featuredMedia, 10, 64); err == nil {
@@ -127,7 +127,7 @@ func (s *service) ListPosts(ctx context.Context, params model.ListRequest) (inte
 	}
 
 	//set tag and category term taxonomies that will be used to filter posts
-	tags, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.Tags, model.TAG_TYPE)
+	tags, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.Tags, model.TagType)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"params": params.Tags,
@@ -135,7 +135,7 @@ func (s *service) ListPosts(ctx context.Context, params model.ListRequest) (inte
 		}).Errorf("Failed to get term taxonomy for tags: %s", err)
 		return nil, err
 	}
-	categories, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.Categories, model.CATEGORY_TYPE)
+	categories, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.Categories, model.CategoryType)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"params": params.Categories,
@@ -143,11 +143,11 @@ func (s *service) ListPosts(ctx context.Context, params model.ListRequest) (inte
 		}).Errorf("Failed to get term taxonomy for categories: %s", err)
 		return nil, err
 	}
-	termTaxonomiesMap := map[string][]*model.TermTaxonomy{model.TAG_TYPE: tags, model.CATEGORY_TYPE: categories}
+	termTaxonomiesMap := map[string][]*model.TermTaxonomy{model.TagType: tags, model.CategoryType: categories}
 	params.ListParams.TermTaxonomies = termTaxonomiesMap
 
 	//set excluded tag and category term taxonomies that will be used to filter posts
-	tagsExclude, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.TagsExclude, model.TAG_TYPE)
+	tagsExclude, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.TagsExclude, model.TagType)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"params": params.TagsExclude,
@@ -155,7 +155,7 @@ func (s *service) ListPosts(ctx context.Context, params model.ListRequest) (inte
 		}).Errorf("Failed to get term taxonomy for tags exclude: %s", err)
 		return nil, err
 	}
-	categoriesExclude, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.CategoriesExclude, model.CATEGORY_TYPE)
+	categoriesExclude, err := s.term.TermTaxonomyByTermIDListTaxonomy(params.CategoriesExclude, model.CategoryType)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"params": params.CategoriesExclude,
@@ -163,7 +163,7 @@ func (s *service) ListPosts(ctx context.Context, params model.ListRequest) (inte
 		}).Errorf("Failed to get term taxonomy for categories exclude: %s", err)
 		return nil, err
 	}
-	termTaxonomiesMapExclude := map[string][]*model.TermTaxonomy{model.TAG_TYPE: tagsExclude, model.CATEGORY_TYPE: categoriesExclude}
+	termTaxonomiesMapExclude := map[string][]*model.TermTaxonomy{model.TagType: tagsExclude, model.CategoryType: categoriesExclude}
 	params.ListParams.TermTaxonomiesExclude = termTaxonomiesMapExclude
 	postIDList, err := s.post.QueryPosts(ctx, params.ListParams.ListFilter)
 	if err != nil {
@@ -229,7 +229,7 @@ func (s *service) ListPosts(ctx context.Context, params model.ListRequest) (inte
 			}
 		}
 
-		if params.Context != nil && *params.Context == "embed" {
+		if params.Context != nil && *params.Context == model.EmbedContext {
 			basePosts = append(basePosts, &model.ContentBase{Base: p.Base, SharedContent: p.SharedContent, Embedded: p.Embedded})
 			continue
 		}
@@ -286,7 +286,7 @@ func (s *service) GetPost(ctx context.Context, params model.GetItemRequest) (int
 	}
 
 	// if context = embed, we only return core attributes of post
-	if params.Context == "embed" {
+	if params.Context == model.EmbedContext {
 		return &model.ContentBase{Base: p.Base, SharedContent: p.SharedContent, Embedded: p.Embedded}, err
 	}
 
@@ -298,7 +298,7 @@ func (s *service) GetPost(ctx context.Context, params model.GetItemRequest) (int
 
 // SetPostEmbedded set required attributes of post for _embed
 func (s *service) SetPostEmbedded(ctx context.Context, p *model.Post, taxonomies []*model.TermWithPostTaxonomy, formatMap map[uint64]string, user *model.UserDetail) error {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 
 	p.Embedded = &model.Embedded{}
 	// set author
@@ -380,7 +380,7 @@ func (s *service) GetEmbeddedFeaturedMedia(ctx context.Context, p *model.Post) (
 		}
 	}
 
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	mediaDetail := &model.MediaDetails{}
 
 	if metadataOk {
@@ -560,10 +560,10 @@ func (s *service) TermPostTaxonomiesAsEmbeddedTerms(APIBaseURL string, taxonomie
 	for _, t := range taxonomies {
 		term := &t.Term
 
-		if t.Taxonomy == model.CATEGORY_TYPE {
+		if t.Taxonomy == model.CategoryType {
 			term.Link = model.CategoryLink(APIBaseURL, t.Slug)
 
-		} else if t.Taxonomy == model.TAG_TYPE {
+		} else if t.Taxonomy == model.TagType {
 			term.Link = model.TagLink(APIBaseURL, t.Slug)
 
 		}

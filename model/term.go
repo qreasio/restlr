@@ -20,6 +20,7 @@ type Term struct {
 	Links    *TermLink `json:"_links"`   // name
 }
 
+// TermTaxonomyJoin stores Term fields and additional fields relate with term
 type TermTaxonomyJoin struct {
 	Term
 	TermGroup      int64  `json:"term_group"` // term_group
@@ -29,6 +30,7 @@ type TermTaxonomyJoin struct {
 	Count          int64  `json:"count"`       // count
 }
 
+// TermWithPostTaxonomy link TermTaxonomyJoin with object id
 type TermWithPostTaxonomy struct {
 	TermTaxonomyJoin
 	ObjectID uint64 `json:"object_id"` // object_id
@@ -41,6 +43,7 @@ type Curie struct {
 	Templated bool   `json:"templated"`
 }
 
+// TermLink to store links related attributes in term response
 type TermLink struct {
 	SelfLink   []map[string]string `json:"self"`
 	Collection []map[string]string `json:"collection"`

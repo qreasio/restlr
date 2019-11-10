@@ -20,13 +20,20 @@ import (
 )
 
 var (
-	APIHost     = "http://localhost:8080"
-	SiteURL     = "http://localhost:8080"
-	UploadPath  = "uploads"
+	// APIHost is default value of the API host
+	APIHost = "http://localhost:8080"
+	// SiteURL is default URL value of the frontend/website that serve the content from the API
+	SiteURL = "http://localhost:8080"
+	// UploadPath is the static files or uploaded file folder path
+	UploadPath = "uploads"
+	// TablePrefix is the prefix of tables
 	TablePrefix = "wp_"
-	APIPath     = "wp-json/wp"
-	Version     = "v2"
-	ServerPort  = "8080"
+	// APIPath is the path for the API relative to APIHost
+	APIPath = "wp-json/wp"
+	// Version is the version path for the API
+	Version = "v2"
+	// ServerPort is port of the API server
+	ServerPort = "8080"
 )
 
 // SetAPIContext will set the APIConfig struct instance in context to store the important data that will be used in most all endpoints
@@ -43,7 +50,7 @@ func SetAPIContext() func(next http.Handler) http.Handler {
 				Version:     Version,
 			}
 			apiModel.APIBaseURL = fmt.Sprintf("%s/%s/%s", apiModel.APIHost, apiModel.APIPath, apiModel.Version)
-			ctx := context.WithValue(r.Context(), model.APICONFIGKEY, apiModel)
+			ctx := context.WithValue(r.Context(), model.APIConfigKey, apiModel)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

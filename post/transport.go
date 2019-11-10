@@ -16,19 +16,20 @@ import (
 
 var decoder *form.Decoder
 
+// MakeHTTPHandler returns http handler that makes a set of endpoints available on predefined paths
 func MakeHTTPHandler(s Service) http.Handler {
 	r := chi.NewRouter()
 
 	ListPostsHandler := kithttp.NewServer(
 		makeListPostsEndpoint(s),
-		ListPostsRequestDecoder,
+		listPostsRequestDecoder,
 		resthttp.EncodeJSONResponse,
 	)
 	r.Method(http.MethodGet, "/", ListPostsHandler)
 
 	GetPostHandler := kithttp.NewServer(
 		makeGetPostEndpoint(s),
-		GetPostRequestDecoder,
+		getPostRequestDecoder,
 		resthttp.EncodeJSONResponse,
 		[]kithttp.ServerOption{
 			kithttp.ServerErrorEncoder(resthttp.EncodeError),
@@ -39,7 +40,7 @@ func MakeHTTPHandler(s Service) http.Handler {
 	return r
 }
 
-func GetPostRequestDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
+func getPostRequestDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var getRequest model.GetItemRequest
 	r.ParseForm()
 	decoder = form.NewDecoder()
@@ -69,7 +70,7 @@ func GetPostRequestDecoder(ctx context.Context, r *http.Request) (interface{}, e
 	return getRequest, nil
 }
 
-func ListPostsRequestDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
+func listPostsRequestDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var filter = model.ListFilter{Page: 1, PerPage: 100, Status: toolbox.StringPointer("publish"), Type: "post"}
 	var params = model.ListParams{ListFilter: filter}
 	var listRequest = model.ListRequest{ListParams: params}

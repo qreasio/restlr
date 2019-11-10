@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-// IntToStr is function to convert uint64 to string data type
+// UInt64ToStr is function to convert uint64 to string data type
 func UInt64ToStr(val uint64) string {
 	return strconv.FormatUint(val, 10)
 }
 
-// IntToStrSlice is function to convert uint64 to string slice with converted uint64 argument as initial member
+// UInt64ToStrSlice is function to convert uint64 to string slice with converted uint64 argument as initial member
 func UInt64ToStrSlice(val uint64) []string {
 	return []string{UInt64ToStr(val)}
 }

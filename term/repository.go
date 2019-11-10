@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
 )
 
+// Repository is interface for functions to interact with database
 type Repository interface {
 	PostTermTaxonomyByIDs(ctx context.Context, idStringArray []string) (map[uint64][]*model.TermWithPostTaxonomy, error)
 	GetPostTaxonomyAndFormat(ctx context.Context, idStringArr []string) (map[uint64][]*model.TermWithPostTaxonomy, map[uint64]map[string][]uint64, map[uint64]string, error)
@@ -22,18 +22,20 @@ type repository struct {
 	db *sql.DB
 }
 
+// NewRepository is function to create new repository struct instance that implements Repository interface
 func NewRepository(db *sql.DB) Repository {
 	return &repository{
 		db: db,
 	}
 }
 
-func (repo *repository) PostTermTaxonomyByIDs(ctx context.Context, idStringArray []string) (map[uint64][]*model.TermWithPostTaxonomy, error) {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+// PostTermTaxonomyByIDs is function get get post term taxonomy from list of post ids
+func (repo *repository) PostTermTaxonomyByIDs(ctx context.Context, idList []string) (map[uint64][]*model.TermWithPostTaxonomy, error) {
+	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	termsTableName := config.TablePrefix + "terms"
 	termTaxonomyTableName := config.TablePrefix + "term_taxonomy"
 	termRelationsTableName := config.TablePrefix + "term_relationships"
-	sql := fmt.Sprintf(`SELECT t.*, tt.term_taxonomy_id, tt.taxonomy, tt.description, tt.parent, tt.count, tr.object_id FROM %s AS t  `+
+	sqlQuery := fmt.Sprintf(`SELECT t.*, tt.term_taxonomy_id, tt.taxonomy, tt.description, tt.parent, tt.count, tr.object_id FROM %s AS t  `+
 		`INNER JOIN %s AS tt ON t.term_id = tt.term_id `+
 		`INNER JOIN %s AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id `+
 		`WHERE tt.taxonomy IN ('category', 'post_tag', 'post_format') AND tr.object_id IN (%s) `+
@@ -41,13 +43,13 @@ func (repo *repository) PostTermTaxonomyByIDs(ctx context.Context, idStringArray
 		termsTableName,
 		termTaxonomyTableName,
 		termRelationsTableName,
-		strings.Join(idStringArray, ","))
+		strings.Join(idList, ","))
 
-	q, err := repo.db.Query(sql)
+	q, err := repo.db.Query(sqlQuery)
 
 	if err != nil {
 		log.WithFields(log.Fields{
-			"params": sql,
+			"params": sqlQuery,
 			"func":   "db.Query",
 		}).Errorf("Failed to run db query: %s", err)
 		return nil, err
@@ -64,7 +66,7 @@ func (repo *repository) PostTermTaxonomyByIDs(ctx context.Context, idStringArray
 
 		if err != nil {
 			log.WithFields(log.Fields{
-				"params": sql,
+				"params": sqlQuery,
 				"func":   "q.Scan",
 			}).Errorf("Failed to run q scan: %s", err)
 			return nil, err
@@ -80,12 +82,13 @@ func (repo *repository) PostTermTaxonomyByIDs(ctx context.Context, idStringArray
 	return result, nil
 }
 
-func (repo *repository) GetPostTaxonomyAndFormat(ctx context.Context, idStringArr []string) (map[uint64][]*model.TermWithPostTaxonomy, map[uint64]map[string][]uint64, map[uint64]string, error) {
-	termsMap, err := repo.PostTermTaxonomyByIDs(ctx, idStringArr)
+// GetPostTaxonomyAndFormat is function to get map of post ID as key and TermWithPostTaxonomy from list of post id
+func (repo *repository) GetPostTaxonomyAndFormat(ctx context.Context, idList []string) (map[uint64][]*model.TermWithPostTaxonomy, map[uint64]map[string][]uint64, map[uint64]string, error) {
+	termsMap, err := repo.PostTermTaxonomyByIDs(ctx, idList)
 
 	if err != nil {
 		log.WithFields(log.Fields{
-			"params": idStringArr,
+			"params": idList,
 			"func":   "repo.PostTermTaxonomyByIDs",
 		}).Errorf("Failed to get PostTermTaxonomyByIDs: %s", err)
 		return nil, nil, nil, err

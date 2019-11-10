@@ -7,6 +7,7 @@ import (
 	"github.com/qreasio/restlr/toolbox"
 )
 
+// Comment is struct to represents comment in post
 type Comment struct {
 	ID              uint64           `json:"id"`
 	Parent          uint64           `json:"parent"`
@@ -21,7 +22,7 @@ type Comment struct {
 	PostID          *uint64          `json:"post_id,omitempty"`
 }
 
-//CommentLink is to represents _links in EmbedPostComment
+// CommentLink is to represents _links in EmbedPostComment
 type CommentLink struct {
 	SelfLink   []map[string]string      `json:"self"`
 	Collection []map[string]string      `json:"collection"`
@@ -31,7 +32,7 @@ type CommentLink struct {
 	Children   []*map[string]string     `json:"children,omitempty"`
 }
 
-//EmbeddableCommentLink struct for CommentLink in EmbedPostComment that have embeddable property
+// EmbeddableCommentLink struct for CommentLink in EmbedPostComment that have embeddable property
 type EmbeddableCommentLink struct {
 	EmbeddableLink
 	PostType string `json:"post_type"`

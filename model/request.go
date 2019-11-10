@@ -1,5 +1,6 @@
 package model
 
+// GetItemRequest is struct to represents common HTTP URL request values to get specific post or item in API
 type GetItemRequest struct {
 	ID       *uint64
 	Context  string  `form:"context"`

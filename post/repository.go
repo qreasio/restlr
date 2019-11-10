@@ -8,13 +8,19 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
 	"github.com/yvasiyarov/php_session_decoder/php_serialize"
 )
 
+const (
+	postNamePermalink = "/%postname%/"
+	postTableAlias    = "postp"
+	orderByInclude    = "include"
+)
+
+// Repository is interface for functions to interact with database
 type Repository interface {
 	PostByID(ctx context.Context, postID uint64, postType string) (*model.Post, error)
 	QueryPosts(ctx context.Context, listRequest model.ListFilter) ([]uint64, error)
@@ -28,6 +34,7 @@ type repository struct {
 	db *sql.DB
 }
 
+// NewRepository is function to create new repository struct instance that implements Repository interface
 func NewRepository(db *sql.DB) Repository {
 	return &repository{
 		db: db,
@@ -43,7 +50,7 @@ func getQueryColumns(postType string, siteURL string, permalinkStructure string,
 		permalinkStructure + `', '%year%', DATE_FORMAT( ` + dottedAlias + `post_date, '%Y' ) ) ,'%monthnum%', 
 			DATE_FORMAT( ` + dottedAlias + `post_date, '%m' ) ) , '%day%', 
 			DATE_FORMAT( ` + dottedAlias + `post_date, '%d' ) ) , 
-			'%postname%', ` + dottedAlias + `post_name ) , '%category%', ` + dottedAlias + `post_type ) ) AS permalink `
+			postNamePermalink, ` + dottedAlias + `post_name ) , '%category%', ` + dottedAlias + `post_type ) ) AS permalink `
 
 	fields := []string{
 		dottedAlias + "ID",
@@ -67,11 +74,11 @@ func getQueryColumns(postType string, siteURL string, permalinkStructure string,
 
 	switch postType {
 
-	case "page":
+	case model.PageType:
 		fields = append(fields, alias+"."+"menu_order")
 		fields = append(fields, alias+"."+"post_parent")
 
-	case "media":
+	case model.MediaType:
 		fields = append(fields, alias+"."+"post_mime_type")
 	}
 
@@ -83,12 +90,12 @@ func getQueryProperties(post *model.Post, postType string) []interface{} {
 	fields := []interface{}{&post.ID, &post.Author, &post.Date, &post.DateGmt, &post.Content.Rendered, &post.Title.Rendered, &post.Excerpt.Rendered, &post.Status,
 		&post.CommentStatus, &post.PingStatus, &post.Password, &post.Slug, &post.Modified, &post.ModifiedGmt, &post.GUID.Rendered, &post.Type, &post.Link}
 
-	if postType == "page" {
+	if postType == model.PageType {
 		fields = append(fields, &post.MenuOrder)
 		fields = append(fields, &post.Parent)
 	}
 
-	if postType == "media" {
+	if postType == model.MediaType {
 		fields = append(fields, &post.MimeType)
 	}
 
@@ -108,20 +115,18 @@ func NewPost() model.Post {
 
 // getPostByIDSQL return string sql to get post by id
 func getPostByIDSQL(ctx context.Context, postType string) string {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
-	permalinkStructure := "/%postname%/"
-	alias := "postp"
 
-	columnsList := strings.Join(getQueryColumns(postType, config.SiteURL, permalinkStructure, alias), ",")
+	columnsList := strings.Join(getQueryColumns(postType, config.SiteURL, postNamePermalink, postTableAlias), ",")
 
 	sqlQuery := fmt.Sprintf(`SELECT %s `+
 		` FROM %s %s`+
 		` WHERE %s.ID = ?`,
 		columnsList,
 		tableName,
-		alias,
-		alias,
+		postTableAlias,
+		postTableAlias,
 	)
 
 	return sqlQuery
@@ -186,32 +191,32 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 	if len(params.StickyIDs) > 0 {
 		var postIDList []string
 
-		for postID, _ := range params.StickyIDs {
+		for postID := range params.StickyIDs {
 			postIDString := fmt.Sprintf("%v", postID)
 			postIDList = append(postIDList, postIDString)
 		}
 
-		postIdCSV := strings.Join(postIDList, ",")
+		postIDCSV := strings.Join(postIDList, ",")
 
 		if *params.Sticky {
-			sqlFilter += " AND ID IN (" + postIdCSV + ")"
+			sqlFilter += " AND ID IN (" + postIDCSV + ")"
 		}
 
 		if !*params.Sticky {
-			sqlFilter += " AND ID NOT IN (" + postIdCSV + ")"
+			sqlFilter += " AND ID NOT IN (" + postIDCSV + ")"
 		}
 	}
 
 	var taxonomyIDs = make([]string, 0)
 
-	if len(params.TermTaxonomies[model.TAG_TYPE]) > 0 {
-		for _, tt := range params.TermTaxonomies[model.TAG_TYPE] {
+	if len(params.TermTaxonomies[model.TagType]) > 0 {
+		for _, tt := range params.TermTaxonomies[model.TagType] {
 			taxonomyIDs = append(taxonomyIDs, strconv.FormatUint(tt.TermTaxonomyID, 10))
 		}
 	}
 
-	if len(params.TermTaxonomies[model.CATEGORY_TYPE]) > 0 {
-		for _, tt := range params.TermTaxonomies[model.CATEGORY_TYPE] {
+	if len(params.TermTaxonomies[model.CategoryType]) > 0 {
+		for _, tt := range params.TermTaxonomies[model.CategoryType] {
 			taxonomyIDs = append(taxonomyIDs, strconv.FormatUint(tt.TermTaxonomyID, 10))
 		}
 	}
@@ -222,14 +227,14 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 
 	var taxonomyIDsExclude = make([]string, 0)
 
-	if len(params.TermTaxonomiesExclude[model.TAG_TYPE]) > 0 {
-		for _, tt := range params.TermTaxonomiesExclude[model.TAG_TYPE] {
+	if len(params.TermTaxonomiesExclude[model.TagType]) > 0 {
+		for _, tt := range params.TermTaxonomiesExclude[model.TagType] {
 			taxonomyIDsExclude = append(taxonomyIDs, strconv.FormatUint(tt.TermTaxonomyID, 10))
 		}
 	}
 
-	if len(params.TermTaxonomiesExclude[model.CATEGORY_TYPE]) > 0 {
-		for _, tt := range params.TermTaxonomiesExclude[model.CATEGORY_TYPE] {
+	if len(params.TermTaxonomiesExclude[model.CategoryType]) > 0 {
+		for _, tt := range params.TermTaxonomiesExclude[model.CategoryType] {
 			taxonomyIDsExclude = append(taxonomyIDs, strconv.FormatUint(tt.TermTaxonomyID, 10))
 		}
 	}
@@ -283,7 +288,7 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 		args = append(args, "attachment")
 
 	} else {
-		args = append(args, "post")
+		args = append(args, model.PostType)
 
 	}
 
@@ -302,23 +307,23 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 	}
 
 	orderFieldMap := map[string]string{"title": "post_title",
-		"author":    "post_author",
-		"date":      "post_date",
-		"id":        "post_id",
-		"modified":  "post_modified",
-		"parent":    "post_parent",
-		"slug":      "post_name",
-		"include":   "FIELD(ID, " + toolbox.UInt64SliceToCSV(params.Include) + ")",
-		"relevance": "post_title LIKE '%" + search + "%'"}
+		"author":       "post_author",
+		"date":         "post_date",
+		"id":           "post_id",
+		"modified":     "post_modified",
+		"parent":       "post_parent",
+		"slug":         "post_name",
+		orderByInclude: "FIELD(ID, " + toolbox.UInt64SliceToCSV(params.Include) + ")",
+		"relevance":    "post_title LIKE '%" + search + "%'"}
 
 	if params.OrderBy != nil {
 
-		if len(params.Include) == 0 && *params.OrderBy == "include" {
+		if len(params.Include) == 0 && *params.OrderBy == orderByInclude {
 			return "", nil, "", "", errors.New("you need to define an include parameter to order by include")
 		}
 
 		//if order by parameter is 'include', we ignore the ascending and descending order
-		if len(params.Include) > 0 && *params.OrderBy == "include" {
+		if len(params.Include) > 0 && *params.OrderBy == orderByInclude {
 			sortOrder = ""
 		}
 
@@ -338,9 +343,9 @@ func getSQLFilterAndArgs(tablePrefix string, params model.ListFilter) (string, [
 	return sqlFilter, args, orderBy, sortOrder, nil
 }
 
-// getSQLFilterAndArgs return sql query string and argument slice to filter posts
+// getSQLQuery return sql query string and argument slice to filter posts
 func getSQLQuery(ctx context.Context, params model.ListFilter) (string, []interface{}, error) {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
 	var args []interface{}
 	sqlFilter, args, orderBy, sortDirection, err := getSQLFilterAndArgs(config.TablePrefix, params)
@@ -411,20 +416,19 @@ func (repo *repository) QueryPosts(ctx context.Context, params model.ListFilter)
 
 // getPostsByIDsSQL return sql query string to get post from some post IDs in csv format (comma separated string)
 func (repo *repository) getPostsByIDsSQL(ctx context.Context, postType string, postIDList string) string {
-	config := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
 	permalinkStructure := "/%postname%/"
-	alias := "postp"
 
-	columnsList := strings.Join(getQueryColumns(postType, config.SiteURL, permalinkStructure, alias), ",")
+	columnsList := strings.Join(getQueryColumns(postType, config.SiteURL, permalinkStructure, postTableAlias), ",")
 
 	sqlQuery := fmt.Sprintf(`SELECT %s `+
 		` FROM %s %s`+
 		` WHERE %s.ID IN (%s)`,
 		columnsList,
 		tableName,
-		alias,
-		alias,
+		postTableAlias,
+		postTableAlias,
 		postIDList,
 	)
 	return sqlQuery
@@ -452,8 +456,8 @@ func (repo *repository) PostsByIDs(ctx context.Context, postType string, idList 
 
 	for q.Next() {
 		p := NewPost()
-		if p.Type == "post" {
-			p.Format = "standard"
+		if p.Type == model.PostType {
+			p.Format = model.StandardFormat
 		}
 		fields := getQueryProperties(&p, postType) // get list of target fields to be scanned
 		// scan
@@ -482,7 +486,7 @@ func (repo *repository) PostByID(ctx context.Context, id uint64, postType string
 
 	post := NewPost()
 	if postType == "post" {
-		post.Format = "standard"
+		post.Format = model.StandardFormat
 	}
 
 	sqlQuery := getPostByIDSQL(ctx, postType)     //generate SQL
@@ -505,7 +509,7 @@ func (repo *repository) PostByID(ctx context.Context, id uint64, postType string
 	}
 
 	// if media and mime type contains image, we set media type to image
-	if postType == "media" && strings.Contains(*post.MimeType, "image") {
+	if postType == model.MediaType && strings.Contains(*post.MimeType, "image") {
 		post.MediaType = toolbox.StringPointer("image")
 	}
 
@@ -582,7 +586,7 @@ func (repo *repository) CommentsByPostIDs(commentPostIDStr []string) ([]*model.C
 // GetPredecessorVersion is function to get post ID of previous version from [prefix]posts table
 func (repo *repository) GetPredecessorVersion(ctx context.Context, idList []uint64) (map[uint64]map[int]uint64, error) {
 	var err error
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "posts"
 	idParameters := toolbox.UInt64SliceToCSV(idList)
 

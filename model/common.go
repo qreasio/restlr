@@ -3,9 +3,22 @@ package model
 import "github.com/go-openapi/strfmt"
 
 const (
-	APICONFIGKEY  = "APICONFIG"
-	TAG_TYPE      = "post_tag"
-	CATEGORY_TYPE = "category"
+	// APIConfigKey is string for storing APIConfig in context
+	APIConfigKey = "APICONFIG"
+	// TagType stores string value to define Tag taxonomy type
+	TagType = "post_tag"
+	// CategoryType stores string value to define Category taxonomy type
+	CategoryType = "category"
+	// PostType stores string value to define post type
+	PostType = "post"
+	// MediaType stores string value to define media type
+	MediaType = "media"
+	// PageType stores string value to define media type
+	PageType = "page"
+	// EmbedContext stores 'embed' value of context request parameter
+	EmbedContext = "embed"
+	// StandardFormat stores value for standard format
+	StandardFormat = "standard"
 )
 
 // Base is struct that represent base of post, page, media data that also usually used inside _embed
@@ -33,6 +46,7 @@ type Base struct {
 	Author uint64 `json:"author,omitempty"`
 }
 
+// BaseLink is struct that represents common properties for '_links' json response
 type BaseLink struct {
 	SelfLink []map[string]string `json:"self"`
 
@@ -57,7 +71,7 @@ type APIConfig struct {
 	APIBaseURL         string
 }
 
-// Content represents content in post json response
+// ContentRendered represents content in post json response
 type ContentRendered struct {
 	Rendered  string `json:"rendered"`
 	Protected bool   `json:"protected"`
@@ -68,6 +82,7 @@ type Rendered struct {
 	Rendered *string `json:"rendered"`
 }
 
+// PluralContentTypeMap is map to store singular verb with plural values of content type name
 var PluralContentTypeMap = map[string]string{
 	"post":     "posts",
 	"page":     "pages",
@@ -76,6 +91,7 @@ var PluralContentTypeMap = map[string]string{
 	"comment":  "comments",
 }
 
+// Plural is function to make it easier to get plural form of specific content type
 func Plural(contentType string) string {
 	return PluralContentTypeMap[contentType]
 }

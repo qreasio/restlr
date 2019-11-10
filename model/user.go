@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// User contains the compact data for user
 type User struct {
 	ID          uint64   `json:"ID"`
 	DisplayName string   `json:"name"`
@@ -12,6 +13,7 @@ type User struct {
 	Links       UserLink `json:"_links"`
 }
 
+// UserDetail contains the longer and complete user data
 type UserDetail struct {
 	User
 	Email         *string            `json:"email,omitempty"`

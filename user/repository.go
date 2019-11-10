@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/toolbox"
 	log "github.com/sirupsen/logrus"
 )
 
+// Repository is interface for functions to interact with database
 type Repository interface {
 	GetUserByID(ctx context.Context, id uint64) (*model.UserDetail, error)
 	GetUserByIDList(ctx context.Context, idList []uint64) (map[uint64]*model.UserDetail, error)
@@ -20,14 +20,16 @@ type repository struct {
 	db *sql.DB
 }
 
+// NewRepository is function to create new repository struct instance that implements Repository interface
 func NewRepository(db *sql.DB) Repository {
 	return &repository{
 		db: db,
 	}
 }
 
+// GetUserByID is function to get UserDetail from specific id parameter
 func (repo *repository) GetUserByID(ctx context.Context, id uint64) (*model.UserDetail, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "users"
 	metaTableName := apiConfig.TablePrefix + "usermeta"
 
@@ -43,8 +45,9 @@ func (repo *repository) GetUserByID(ctx context.Context, id uint64) (*model.User
 	return wu, err
 }
 
+// GetUserByIDList is function to get list of UserDetail from idList parameter
 func (repo *repository) GetUserByIDList(ctx context.Context, idList []uint64) (map[uint64]*model.UserDetail, error) {
-	apiConfig := ctx.Value(model.APICONFIGKEY).(model.APIConfig)
+	apiConfig := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := apiConfig.TablePrefix + "users"
 	metaTableName := apiConfig.TablePrefix + "usermeta"
 
