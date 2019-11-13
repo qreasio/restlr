@@ -13,7 +13,6 @@ import (
 type Repository interface {
 	GetUserByID(ctx context.Context, id uint64) (*model.UserDetail, error)
 	GetUserByIDList(ctx context.Context, idList []uint64) (map[uint64]*model.UserDetail, error)
-	UserDetailAsUserSlice(baseURL string, apiHost string, u *model.UserDetail) []*model.User
 }
 
 type repository struct {
@@ -82,24 +81,4 @@ func (repo *repository) GetUserByIDList(ctx context.Context, idList []uint64) (m
 	}
 
 	return res, err
-}
-
-func (repo *repository) UserDetailAsUserSlice(baseURL string, apiHost string, u *model.UserDetail) []*model.User {
-	var users []*model.User
-
-	user := &u.User
-	user.Link = apiHost + "/author/" + u.NiceName
-
-	selfLink := baseURL + "/users/" + toolbox.UInt64ToStr(u.ID)
-	if len(user.Links.SelfLink) < 1 {
-		user.Links.SelfLink = append(user.Links.SelfLink, map[string]string{"href": selfLink})
-	}
-
-	collectionLink := baseURL + "/users"
-	if len(user.Links.Collection) < 1 {
-		user.Links.Collection = append(user.Links.Collection, map[string]string{"href": collectionLink})
-	}
-
-	users = append(users, user)
-	return users
 }

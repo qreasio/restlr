@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/qreasio/restlr/toolbox"
+)
 
 // User contains the compact data for user
 type User struct {
@@ -29,4 +33,25 @@ type UserDetail struct {
 type UserLink struct {
 	SelfLink   []map[string]string `json:"self"`
 	Collection []map[string]string `json:"collection"`
+}
+
+// UserDetailAsUserSlice transforms single UserDetail as User slice
+func (u *UserDetail) UserDetailAsUserSlice(baseURL string, apiHost string) []*User {
+	var users []*User
+
+	user := &u.User
+	user.Link = apiHost + "/author/" + u.NiceName
+
+	selfLink := baseURL + "/users/" + toolbox.UInt64ToStr(u.ID)
+	if len(user.Links.SelfLink) < 1 {
+		user.Links.SelfLink = append(user.Links.SelfLink, map[string]string{"href": selfLink})
+	}
+
+	collectionLink := baseURL + "/users"
+	if len(user.Links.Collection) < 1 {
+		user.Links.Collection = append(user.Links.Collection, map[string]string{"href": collectionLink})
+	}
+
+	users = append(users, user)
+	return users
 }

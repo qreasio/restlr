@@ -418,9 +418,8 @@ func (repo *repository) QueryPosts(ctx context.Context, params model.ListFilter)
 func (repo *repository) getPostsByIDsSQL(ctx context.Context, postType string, postIDList string) string {
 	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	tableName := config.TablePrefix + "posts"
-	permalinkStructure := "/%postname%/"
 
-	columnsList := strings.Join(getQueryColumns(postType, config.SiteURL, permalinkStructure, postTableAlias), ",")
+	columnsList := strings.Join(getQueryColumns(postType, config.SiteURL, postNamePermalink, postTableAlias), ",")
 
 	sqlQuery := fmt.Sprintf(`SELECT %s `+
 		` FROM %s %s`+

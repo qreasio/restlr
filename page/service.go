@@ -203,7 +203,7 @@ func (s *service) SetEmbedded(ctx context.Context, p *model.Post, user *model.Us
 	config := ctx.Value(model.APIConfigKey).(model.APIConfig)
 	p.Embedded = &model.Embedded{}
 
-	p.Embedded.Author = s.user.UserDetailAsUserSlice(config.APIBaseURL, config.APIHost, user)
+	p.Embedded.Author = user.UserDetailAsUserSlice(config.APIBaseURL, config.APIHost)
 	return nil
 }
 

@@ -302,7 +302,7 @@ func (s *service) SetPostEmbedded(ctx context.Context, p *model.Post, taxonomies
 
 	p.Embedded = &model.Embedded{}
 	// set author
-	p.Embedded.Author = s.user.UserDetailAsUserSlice(apiConfig.APIBaseURL, apiConfig.APIHost, user)
+	p.Embedded.Author = user.UserDetailAsUserSlice(apiConfig.APIBaseURL, apiConfig.APIHost)
 	// set comments
 	ids := toolbox.UInt64ToStrSlice(p.ID)
 	comments, err := s.post.CommentsByPostIDs(ids)

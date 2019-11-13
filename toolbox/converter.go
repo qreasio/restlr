@@ -16,22 +16,22 @@ func UInt64ToStrSlice(val uint64) []string {
 }
 
 // StringPointer returns pointer of string
-func StringPointer(v string) *string {
-	return &v
+func StringPointer(val string) *string {
+	return &val
 }
 
 // BoolPointer returns pointer of boolean
-func BoolPointer(v bool) *bool {
-	return &v
+func BoolPointer(val bool) *bool {
+	return &val
 }
 
 // UInt64SliceToCSV is function to convert uint64 slice to string with comma separated values (csv) format
-func UInt64SliceToCSV(vals []uint64) string {
-	var stringVals []string
+func UInt64SliceToCSV(numbers []uint64) string {
+	var stringVars []string
 
-	for _, val := range vals {
-		stringVals = append(stringVals, UInt64ToStr(val))
+	for _, val := range numbers {
+		stringVars = append(stringVars, UInt64ToStr(val))
 	}
 
-	return strings.Join(stringVals, ",")
+	return strings.Join(stringVars, ",")
 }
