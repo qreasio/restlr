@@ -111,7 +111,8 @@ Example HTTP Error Response
 // Many JSON-over-HTTP services can use it as
 // a sensible default. If the response implements Headerer, the provided headers
 // will be applied to the response. If the response implements StatusCoder, the
-// provided StatusCode will be used instead of 200.
+// provided StatusCode will be used instead of 200 and if the response is APIResponse
+// it will set status code from response.Data.Status
 func EncodeJSONResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if header, ok := response.(httpkit.Headerer); ok {
@@ -149,3 +150,5 @@ func EncodeError(_ context.Context, err error, w http.ResponseWriter) {
 	}
 
 }
+
+
