@@ -9,8 +9,9 @@ import (
 	"testing"
 )
 
+var ctx = context.Background()
+
 func TestEncodeError(t *testing.T) {
-	ctx := context.Background()
 	response1 := httptest.NewRecorder()
 
 	//should return 404 status code if error is ErrInvalidRoute
@@ -38,7 +39,6 @@ func (r customResponse) Headers() http.Header {
 }
 
 func TestEncodeJSONResponse(t *testing.T) {
-	ctx := context.Background()
 	resp1 := httptest.NewRecorder()
 
 	//if response is APIResponse
@@ -53,5 +53,4 @@ func TestEncodeJSONResponse(t *testing.T) {
 
 	assert.Equal(t, resp2.Code, http.StatusAccepted)
 	assert.Equal(t, resp2.Header().Get("message"), "Golang is amazing")
-
 }
