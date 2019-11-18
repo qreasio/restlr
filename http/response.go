@@ -150,5 +150,3 @@ func EncodeError(_ context.Context, err error, w http.ResponseWriter) {
 	}
 
 }
-
-

@@ -2,11 +2,12 @@ package http
 
 import (
 	"context"
-	"github.com/qreasio/restlr/model"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/qreasio/restlr/model"
+	"github.com/stretchr/testify/assert"
 )
 
 var ctx = context.Background()

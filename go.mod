@@ -8,6 +8,7 @@ require (
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-openapi/strfmt v0.19.3
 	github.com/go-playground/form v3.1.4+incompatible
+	github.com/golang/mock v1.3.1
 	github.com/joho/godotenv v1.3.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.4.0
