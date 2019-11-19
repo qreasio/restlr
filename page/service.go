@@ -8,7 +8,6 @@ import (
 	"github.com/qreasio/restlr/model"
 	"github.com/qreasio/restlr/post"
 	"github.com/qreasio/restlr/shared"
-	"github.com/qreasio/restlr/term"
 	"github.com/qreasio/restlr/user"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,7 +21,6 @@ type Service interface {
 // service is struct that will implement Service interface and store related repositories
 type service struct {
 	page   post.Repository
-	term   term.Repository
 	shared shared.Repository
 	user   user.Repository
 }

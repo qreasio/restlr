@@ -11,12 +11,13 @@ import (
 	"github.com/golang/mock/gomock"
 	resthttp "github.com/qreasio/restlr/http"
 	"github.com/qreasio/restlr/model"
+	"github.com/qreasio/restlr/page/mock"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetPageHandler(t *testing.T) {
+func TestTransport_GetPageHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	s := NewMockService(ctrl)
+	s := mock.NewMockService(ctrl)
 	handler := MakeHTTPHandler(s)
 	r := chi.NewRouter()
 	r.Mount("/pages", handler)
